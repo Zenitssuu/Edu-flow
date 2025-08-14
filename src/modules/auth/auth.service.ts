@@ -27,8 +27,14 @@ export class AuthService {
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw new Error("Invalid credentials");
 
-    const accessToken = signAccessToken({ userId: user.id });
-    const refreshToken = signRefreshToken({ userId: user.id });
+    const accessToken = signAccessToken({
+      userId: user.id,
+      userEmail: user.email,
+    });
+    const refreshToken = signRefreshToken({
+      userId: user.id,
+      userEmail: user.email,
+    });
 
     await prisma.refreshToken.create({
       data: {
@@ -47,7 +53,10 @@ export class AuthService {
       const stored = await prisma.refreshToken.findUnique({ where: { token } });
       if (!stored) throw new Error("Invalid refresh token");
 
-      const accessToken = signAccessToken({ userId: payload.userId });
+      const accessToken = signAccessToken({
+        userId: payload.userId,
+        userEmail: payload.email,
+      });
       return { accessToken };
     } catch {
       throw new Error("Invalid refresh token");
